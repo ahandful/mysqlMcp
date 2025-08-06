@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "mysql-mcp": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "D:/projects/mysqlMcp/target/mysql-mcp-1.0.0.jar"
+      ],
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "mcp",
+        "host": "localhost",
+        "port": "3306",
+        "user": "root",
+        "password": "your_password",
+        "database": "your_database"
+      }
+    }
+  }
+} 
