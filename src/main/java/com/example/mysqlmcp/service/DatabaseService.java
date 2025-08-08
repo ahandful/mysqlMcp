@@ -76,16 +76,7 @@ public class DatabaseService {
             return databaseConfig.createConnectionFromEnv();
         }
         
-        // 如果指定了连接名称，使用配置的连接
-        if (request.getConnectionName() != null && !request.getConnectionName().isEmpty()) {
-            DatabaseConfig.DatabaseConnection config = databaseConfig.getConnection(request.getConnectionName());
-            if (config == null) {
-                throw new RuntimeException("未找到数据库连接配置: " + request.getConnectionName());
-            }
-            return config;
-        }
-        
-        // 否则使用请求中的参数创建临时配置
+        // 如果没有环境变量配置，使用请求中的参数创建临时配置
         DatabaseConfig.DatabaseConnection config = new DatabaseConfig.DatabaseConnection();
         config.setHost(request.getHost());
         config.setPort(request.getPort());

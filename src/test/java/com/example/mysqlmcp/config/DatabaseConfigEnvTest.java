@@ -16,21 +16,6 @@ public class DatabaseConfigEnvTest {
     public void testHasEnvConnection() {
         // 测试没有环境变量时
         assertFalse(databaseConfig.hasEnvConnection());
-        
-        // 设置环境变量后测试
-        try {
-            System.setProperty("host", "test-host");
-            System.setProperty("database", "test-db");
-            System.setProperty("user", "test-user");
-            
-            // 注意：System.setProperty不会影响System.getenv()，这里只是演示逻辑
-            // 实际测试需要在真实的环境变量环境中进行
-        } finally {
-            // 清理测试环境
-            System.clearProperty("host");
-            System.clearProperty("database");
-            System.clearProperty("user");
-        }
     }
 
     @Test
@@ -41,17 +26,28 @@ public class DatabaseConfigEnvTest {
         assertNotNull(conn);
         assertEquals("localhost", conn.getHost());
         assertEquals(3306, conn.getPort());
+        assertNull(conn.getDatabase()); // 没有环境变量时应该为null
+        assertNull(conn.getUsername()); // 没有环境变量时应该为null
+        assertNull(conn.getPassword()); // 没有环境变量时应该为null
     }
 
     @Test
-    public void testConnectionPriority() {
-        // 测试连接优先级逻辑
-        DatabaseConfig.DatabaseConnection conn = databaseConfig.getConnection("dev");
+    public void testCreateConnectionFromEnvWithPortString() {
+        // 测试端口字符串解析
+        DatabaseConfig.DatabaseConnection conn = databaseConfig.createConnectionFromEnv();
+        
+        // 验证默认端口
+        assertEquals(3306, conn.getPort());
+    }
+
+    @Test
+    public void testEnvironmentVariablePriority() {
+        // 测试环境变量优先级逻辑
+        // 由于无法在测试中设置真实的环境变量，这里只测试方法调用不会抛出异常
+        DatabaseConfig.DatabaseConnection conn = databaseConfig.createConnectionFromEnv();
         assertNotNull(conn);
         
-        // 如果没有环境变量，应该返回配置的连接
-        if (!databaseConfig.hasEnvConnection()) {
-            assertEquals("dev_db", conn.getDatabase());
-        }
+        // 验证默认行为
+        assertFalse(databaseConfig.hasEnvConnection());
     }
 } 

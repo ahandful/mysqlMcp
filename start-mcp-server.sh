@@ -1,33 +1,22 @@
 #!/bin/bash
 
-echo "启动MySQL MCP服务器..."
+echo "Starting MySQL MCP Server..."
 echo
 
 # 检查Java是否安装
 if ! command -v java &> /dev/null; then
-    echo "错误: 未找到Java运行时环境"
-    echo "请确保已安装Java 17或更高版本"
+    echo "Error: Java is not installed or not in PATH"
+    echo "Please install Java 17 or later"
     exit 1
 fi
 
-# 检查Maven是否安装
-if ! command -v mvn &> /dev/null; then
-    echo "错误: 未找到Maven"
-    echo "请确保已安装Maven 3.6或更高版本"
+# 检查jar文件是否存在
+if [ ! -f "mysql-mcp-1.0.0.jar" ]; then
+    echo "Error: mysql-mcp-1.0.0.jar not found"
+    echo "Please make sure the jar file is in the same directory as this script"
     exit 1
 fi
 
-echo "编译项目..."
-mvn clean package -DskipTests
-
-if [ $? -ne 0 ]; then
-    echo "编译失败"
-    exit 1
-fi
-
-echo
-echo "启动MCP服务器..."
-echo "按Ctrl+C停止服务器"
-echo
-
-java -jar target/mysql-mcp-1.0.0.jar 
+# 启动MCP服务器
+echo "Starting MCP server with stdio mode..."
+java -jar mysql-mcp-1.0.0.jar 

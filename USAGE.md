@@ -53,10 +53,7 @@
    - `password`: 密码
    - `database`: 数据库名
 
-2. **连接名称**
-   - 使用预配置的数据库连接
-
-3. **请求参数**（最低优先级）
+2. **请求参数**（备用）
    - 在请求中直接指定连接参数
 
 ## 安全建议
@@ -93,5 +90,64 @@
 ```json
 {
   "sql": "DELETE FROM users WHERE status = 'deleted'"
+}
+```
+
+## 环境切换
+
+### 开发环境
+```json
+{
+  "mcpServers": {
+    "mysql-mcp": {
+      "command": "java",
+      "args": ["-jar", "path/to/mysql-mcp-1.0.0.jar"],
+      "env": {
+        "host": "localhost",
+        "port": "3306",
+        "user": "dev_user",
+        "password": "dev_password",
+        "database": "dev_db"
+      }
+    }
+  }
+}
+```
+
+### 测试环境
+```json
+{
+  "mcpServers": {
+    "mysql-mcp": {
+      "command": "java",
+      "args": ["-jar", "path/to/mysql-mcp-1.0.0.jar"],
+      "env": {
+        "host": "test-server",
+        "port": "3306",
+        "user": "test_user",
+        "password": "test_password",
+        "database": "test_db"
+      }
+    }
+  }
+}
+```
+
+### 生产环境
+```json
+{
+  "mcpServers": {
+    "mysql-mcp": {
+      "command": "java",
+      "args": ["-jar", "path/to/mysql-mcp-1.0.0.jar"],
+      "env": {
+        "host": "prod-server",
+        "port": "3306",
+        "user": "prod_user",
+        "password": "prod_password",
+        "database": "prod_db"
+      }
+    }
+  }
 }
 ``` 

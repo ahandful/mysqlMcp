@@ -1,17 +1,12 @@
 package com.example.mysqlmcp.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@ConfigurationProperties(prefix = "database")
 public class DatabaseConfig {
-    
-    private Map<String, DatabaseConnection> connections = new HashMap<>();
-    private DatabaseConnection defaultConnection;
     
     public static class DatabaseConnection {
         private String host = "localhost";
@@ -19,7 +14,6 @@ public class DatabaseConfig {
         private String database;
         private String username;
         private String password;
-        private String url;
         private Map<String, String> properties = new HashMap<>();
         
         // Getters and Setters
@@ -63,14 +57,6 @@ public class DatabaseConfig {
             this.password = password;
         }
         
-        public String getUrl() {
-            return url;
-        }
-        
-        public void setUrl(String url) {
-            this.url = url;
-        }
-        
         public Map<String, String> getProperties() {
             return properties;
         }
@@ -80,10 +66,6 @@ public class DatabaseConfig {
         }
         
         public String buildConnectionUrl() {
-            if (url != null && !url.isEmpty()) {
-                return url;
-            }
-            
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append("jdbc:mysql://").append(host).append(":").append(port).append("/").append(database);
             urlBuilder.append("?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
@@ -95,30 +77,6 @@ public class DatabaseConfig {
             
             return urlBuilder.toString();
         }
-    }
-    
-    // Getters and Setters
-    public Map<String, DatabaseConnection> getConnections() {
-        return connections;
-    }
-    
-    public void setConnections(Map<String, DatabaseConnection> connections) {
-        this.connections = connections;
-    }
-    
-    public DatabaseConnection getDefaultConnection() {
-        return defaultConnection;
-    }
-    
-    public void setDefaultConnection(DatabaseConnection defaultConnection) {
-        this.defaultConnection = defaultConnection;
-    }
-    
-    public DatabaseConnection getConnection(String name) {
-        if (name == null || name.isEmpty()) {
-            return defaultConnection;
-        }
-        return connections.getOrDefault(name, defaultConnection);
     }
     
     /**

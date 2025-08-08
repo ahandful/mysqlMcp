@@ -2,7 +2,23 @@ spring:
   application:
     name: mysql-mcp-server
   
-  # 日志配置
+  # DataSource configuration for Spring Boot auto-configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  # JPA configuration
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+# 日志配置
 logging:
   level:
     com.example.mysqlmcp: DEBUG
@@ -12,56 +28,4 @@ logging:
 
 # 服务器配置
 server:
-  port: 8080
-
-# 数据库配置
-database:
-  # 默认连接配置
-  default:
-    host: localhost
-    port: 3306
-    database: test
-    username: root
-    password: password
-    properties:
-      useSSL: "false"
-      serverTimezone: "UTC"
-      allowPublicKeyRetrieval: "true"
-      characterEncoding: "utf8"
-  
-  # 多个数据库连接配置
-  connections:
-    # 开发环境数据库
-    dev:
-      host: localhost
-      port: 3306
-      database: dev_db
-      username: dev_user
-      password: dev_password
-      properties:
-        useSSL: "false"
-        serverTimezone: "UTC"
-    
-    # 测试环境数据库
-    test:
-      host: test-server
-      port: 3306
-      database: test_db
-      username: test_user
-      password: test_password
-      properties:
-        useSSL: "true"
-        serverTimezone: "UTC"
-    
-    # 生产环境数据库
-    prod:
-      host: prod-server
-      port: 3306
-      database: prod_db
-      username: prod_user
-      password: ${DB_PASSWORD:prod_password}
-      properties:
-        useSSL: "true"
-        serverTimezone: "UTC"
-        connectionTimeout: "30000"
-        socketTimeout: "60000" 
+  port: 8080 

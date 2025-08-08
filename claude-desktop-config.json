@@ -4,7 +4,7 @@
       "command": "java",
       "args": [
         "-jar",
-        "D:/projects/mysqlMcp/target/mysql-mcp-1.0.0.jar"
+        "mysql-mcp-1.0.0.jar"
       ],
       "env": {
         "host": "localhost",
@@ -15,4 +15,4 @@
       }
     }
   }
-} 
+}

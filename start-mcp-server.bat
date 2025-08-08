@@ -1,39 +1,26 @@
 @echo off
-echo 启动MySQL MCP服务器...
+echo Starting MySQL MCP Server...
 echo.
 
 REM 检查Java是否安装
 java -version >nul 2>&1
 if errorlevel 1 (
-    echo 错误: 未找到Java运行时环境
-    echo 请确保已安装Java 17或更高版本
+    echo Error: Java is not installed or not in PATH
+    echo Please install Java 17 or later
     pause
     exit /b 1
 )
 
-REM 检查Maven是否安装
-mvn -version >nul 2>&1
-if errorlevel 1 (
-    echo 错误: 未找到Maven
-    echo 请确保已安装Maven 3.6或更高版本
+REM 检查jar文件是否存在
+if not exist "mysql-mcp-1.0.0.jar" (
+    echo Error: mysql-mcp-1.0.0.jar not found
+    echo Please make sure the jar file is in the same directory as this script
     pause
     exit /b 1
 )
 
-echo 编译项目...
-call mvn clean package -DskipTests
-
-if errorlevel 1 (
-    echo 编译失败
-    pause
-    exit /b 1
-)
-
-echo.
-echo 启动MCP服务器...
-echo 按Ctrl+C停止服务器
-echo.
-
-java -jar target/mysql-mcp-1.0.0.jar
+REM 启动MCP服务器
+echo Starting MCP server with stdio mode...
+java -jar mysql-mcp-1.0.0.jar
 
 pause 

@@ -7,13 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.*;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @Component
 public class McpServer {
@@ -69,11 +71,13 @@ public class McpServer {
             case "tools/call":
                 handleToolCall(mcpMessage);
                 break;
+            case "tools/list":
+                sendToolsList();
+                break;
             case "notifications/cancel":
                 handleCancel(mcpMessage);
                 break;
             default:
-                logger.warn("未知的方法: {}", mcpMessage.getMethod());
                 sendError(mcpMessage.getId(), -32601, "方法未找到", "未知方法: " + mcpMessage.getMethod());
         }
     }
@@ -83,16 +87,20 @@ public class McpServer {
         
         McpMessage response = new McpMessage();
         response.setId(message.getId());
-        response.setResult(Map.of(
-            "protocolVersion", "2024-11-05",
-            "capabilities", Map.of(
-                "tools", Map.of()
-            ),
-            "serverInfo", Map.of(
-                "name", "mysql-mcp-server",
-                "version", "1.0.0"
-            )
-        ));
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("protocolVersion", "2024-11-05");
+        
+        Map<String, Object> capabilities = new HashMap<>();
+        capabilities.put("tools", new HashMap<>());
+        result.put("capabilities", capabilities);
+        
+        Map<String, Object> serverInfo = new HashMap<>();
+        serverInfo.put("name", "mysql-mcp-server");
+        serverInfo.put("version", "1.0.0");
+        result.put("serverInfo", serverInfo);
+        
+        response.setResult(result);
         
         sendResponse(response);
         
@@ -103,45 +111,59 @@ public class McpServer {
     private void sendToolsList() throws Exception {
         Map<String, Object> tool = new HashMap<>();
         tool.put("name", "execute_sql");
-        tool.put("description", "执行MySQL数据库SQL语句。优先使用环境变量配置的数据库连接，其次使用connectionName或请求参数");
-        tool.put("inputSchema", Map.of(
-            "type", "object",
-            "properties", Map.of(
-                "connectionName", Map.of(
-                    "type", "string",
-                    "description", "数据库连接名称（可选，优先级：环境变量 > connectionName > 请求参数）"
-                ),
-                "sql", Map.of(
-                    "type", "string",
-                    "description", "要执行的SQL语句"
-                ),
-                "host", Map.of(
-                    "type", "string",
-                    "description", "数据库主机地址（可选，优先级最低）"
-                ),
-                "port", Map.of(
-                    "type", "integer",
-                    "description", "数据库端口（可选，默认3306）"
-                ),
-                "database", Map.of(
-                    "type", "string",
-                    "description", "数据库名称（可选，优先级最低）"
-                ),
-                "username", Map.of(
-                    "type", "string",
-                    "description", "用户名（可选，优先级最低）"
-                ),
-                "password", Map.of(
-                    "type", "string",
-                    "description", "密码（可选，优先级最低）"
-                )
-            ),
-            "required", List.of("sql")
-        ));
+        tool.put("description", "执行MySQL数据库SQL语句。优先使用环境变量配置的数据库连接，其次使用请求参数");
+        
+        Map<String, Object> inputSchema = new HashMap<>();
+        inputSchema.put("type", "object");
+        
+        Map<String, Object> properties = new HashMap<>();
+        
+        Map<String, Object> sqlProperty = new HashMap<>();
+        sqlProperty.put("type", "string");
+        sqlProperty.put("description", "要执行的SQL语句");
+        properties.put("sql", sqlProperty);
+        
+        Map<String, Object> hostProperty = new HashMap<>();
+        hostProperty.put("type", "string");
+        hostProperty.put("description", "数据库主机地址（可选，优先级最低）");
+        properties.put("host", hostProperty);
+        
+        Map<String, Object> portProperty = new HashMap<>();
+        portProperty.put("type", "integer");
+        portProperty.put("description", "数据库端口（可选，默认3306）");
+        properties.put("port", portProperty);
+        
+        Map<String, Object> databaseProperty = new HashMap<>();
+        databaseProperty.put("type", "string");
+        databaseProperty.put("description", "数据库名称（可选，优先级最低）");
+        properties.put("database", databaseProperty);
+        
+        Map<String, Object> usernameProperty = new HashMap<>();
+        usernameProperty.put("type", "string");
+        usernameProperty.put("description", "用户名（可选，优先级最低）");
+        properties.put("username", usernameProperty);
+        
+        Map<String, Object> passwordProperty = new HashMap<>();
+        passwordProperty.put("type", "string");
+        passwordProperty.put("description", "密码（可选，优先级最低）");
+        properties.put("password", passwordProperty);
+        
+        inputSchema.put("properties", properties);
+        
+        List<String> required = new ArrayList<>();
+        required.add("sql");
+        inputSchema.put("required", required);
+        
+        tool.put("inputSchema", inputSchema);
         
         McpMessage toolsMessage = new McpMessage();
         toolsMessage.setMethod("tools/list");
-        toolsMessage.setResult(Map.of("tools", List.of(tool)));
+        
+        Map<String, Object> toolsResult = new HashMap<>();
+        List<Map<String, Object>> toolsList = new ArrayList<>();
+        toolsList.add(tool);
+        toolsResult.put("tools", toolsList);
+        toolsMessage.setResult(toolsResult);
         
         sendResponse(toolsMessage);
     }
@@ -172,12 +194,17 @@ public class McpServer {
         // 构建响应
         McpMessage response = new McpMessage();
         response.setId(message.getId());
-        response.setResult(Map.of(
-            "content", List.of(Map.of(
-                "type", "text",
-                "text", objectMapper.writeValueAsString(sqlResponse)
-            ))
-        ));
+        
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> content = new ArrayList<>();
+        
+        Map<String, Object> textContent = new HashMap<>();
+        textContent.put("type", "text");
+        textContent.put("text", objectMapper.writeValueAsString(sqlResponse));
+        content.add(textContent);
+        
+        result.put("content", content);
+        response.setResult(result);
         
         sendResponse(response);
     }
@@ -197,11 +224,12 @@ public class McpServer {
         try {
             McpMessage errorResponse = new McpMessage();
             errorResponse.setId(id);
-            errorResponse.setError(Map.of(
-                "code", code,
-                "message", message,
-                "data", data
-            ));
+            
+            Map<String, Object> error = new HashMap<>();
+            error.put("code", code);
+            error.put("message", message);
+            error.put("data", data);
+            errorResponse.setError(error);
             
             String jsonResponse = objectMapper.writeValueAsString(errorResponse);
             logger.debug("发送错误响应: {}", jsonResponse);
